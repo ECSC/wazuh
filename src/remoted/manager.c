@@ -70,8 +70,9 @@ STATIC void c_multi_group(char *multi_group, OSHash **_f_time, os_md5 *_merged_s
 
 /**
  * @brief Process groups and multigroups files
+ * @param initial_scan Flag indicating if it is the first scan
  */
-STATIC void c_files(void);
+STATIC void c_files(bool initial_scan);
 
 /**
  * @brief Analize and generate new groups, update existing groups
@@ -90,8 +91,9 @@ STATIC void process_deleted_groups();
 
 /**
  * @brief Delete all multigroups that no longer exist
+ * @param initial_scan Flag indicating if it is the first scan
  */
-STATIC void process_deleted_multi_groups();
+STATIC void process_deleted_multi_groups(bool initial_scan);
 
 /**
  * @brief Add file time structure to group hash table
@@ -660,7 +662,7 @@ STATIC void c_multi_group(char *multi_group, OSHash **_f_time, os_md5 *_merged_s
 }
 
 /* Create/update the structure with the files */
-STATIC void c_files()
+STATIC void c_files(bool initial_scan)
 {
     mdebug2("Updating shared files.");
 
@@ -676,7 +678,7 @@ STATIC void c_files()
     process_deleted_groups();
 
     /* Delete residual multigroups */
-    process_deleted_multi_groups();
+    process_deleted_multi_groups(initial_scan);
 
     w_mutex_unlock(&files_mutex);
 
@@ -904,11 +906,28 @@ STATIC void process_deleted_groups() {
     }
 }
 
-STATIC void process_deleted_multi_groups() {
+STATIC void process_deleted_multi_groups(bool initial_scan) {
     char multi_path[PATH_MAX] = {0};
     os_sha256 multi_group_hash;
     OSHashNode *my_node;
     unsigned int i;
+
+    if (initial_scan) {
+        char **ignore_list;
+        int ignore_list_size = 0;
+
+        os_calloc(1, sizeof(char *), ignore_list);
+
+        for (my_node = OSHash_Begin(m_hash, &i); my_node; my_node = OSHash_Next(m_hash, &i, my_node)) {
+            os_realloc(ignore_list, (ignore_list_size + 2) * sizeof(char *), ignore_list);
+            ignore_list[ignore_list_size] = my_node->data;
+            ignore_list[ignore_list_size + 1] = NULL;
+            ignore_list_size++;
+        }
+
+        cldir_ex_ignore(MULTIGROUPS_DIR, (const char **)ignore_list);
+        os_free(ignore_list);
+    }
 
     OSHash_Clean(m_hash, cleaner);
     if (m_hash = OSHash_Create(), m_hash == NULL) {
@@ -1515,7 +1534,7 @@ void *update_shared_files(__attribute__((unused)) void *none)
                 w_yaml_create_groups();
             }
 
-            c_files();
+            c_files(false);
             _stime = _ctime;
         }
 
@@ -1545,7 +1564,7 @@ void manager_init()
     multi_groups = OSHash_Create();
 
     /* Run initial groups and multigroups scan */
-    c_files();
+    c_files(true);
 
     w_yaml_create_groups();
 
