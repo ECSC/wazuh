@@ -352,10 +352,6 @@ void save_controlmsg(const keyentry * key, char *r_msg, size_t msg_length, int *
         return;
     }
 
-    /* Reply to the agent */
-    snprintf(msg_ack, OS_FLSIZE, "%s%s", CONTROL_HEADER, HC_ACK);
-    send_msg(key->id, msg_ack, -1);
-
     /* Filter UTF-8 characters */
     char * clean = w_utf8_filter(r_msg, true);
     r_msg = clean;
@@ -392,6 +388,12 @@ void save_controlmsg(const keyentry * key, char *r_msg, size_t msg_length, int *
             os_free(clean);
             return;
         }
+    }
+
+    if (is_shutdown == 0) {
+        /* Reply to the agent except on shutdown message*/
+        snprintf(msg_ack, OS_FLSIZE, "%s%s", CONTROL_HEADER, HC_ACK);
+        send_msg(key->id, msg_ack, -1);
     }
 
     w_mutex_lock(&lastmsg_mutex);
