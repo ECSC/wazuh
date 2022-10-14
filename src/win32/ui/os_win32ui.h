@@ -69,7 +69,23 @@ typedef struct _ossec_config {
 /*Part of the support for the Restart Manager*/
 typedef HRESULT (_stdcall *RegisterApplicationRestartT)(PCWSTR pwzCommandline, DWORD dwFlags);
 
-
+/*Support for the Restart Manager*/
+HRESULT RegisterApplicationRestartStub(PCWSTR pwzCommandline, DWORD dwFlags)
+{
+  HMODULE hModule = ::LoadLibrary(_T("kernel32.dll"));
+  if (hModule == NULL)
+    return E_FAIL;
+  RegisterApplicationRestartT proc =
+    reinterpret_cast<RegisterApplicationRestartT>(::GetProcAddress(hModule, "RegisterApplicationRestart"));
+  if (proc == NULL)
+  {
+    ::FreeLibrary(hModule);
+    return E_FAIL;
+  }
+  HRESULT ret = (proc)(pwzCommandline, dwFlags);
+  ::FreeLibrary(hModule);
+  return ret;
+}
 
 /** Global variables **/
 
