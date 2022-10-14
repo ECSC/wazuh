@@ -66,6 +66,10 @@ typedef struct _ossec_config {
     char *status;
 } ossec_config;
 
+/*Part of the support for the Restart Manager*/
+typedef HRESULT (_stdcall *RegisterApplicationRestartT)(PCWSTR pwzCommandline, DWORD dwFlags);
+
+
 
 /** Global variables **/
 

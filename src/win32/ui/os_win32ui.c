@@ -16,6 +16,24 @@
 ossec_config config_inst;
 HWND hStatus;
 
+/*Support for the Restart Manager*/
+HRESULT RegisterApplicationRestartStub(PCWSTR pwzCommandline, DWORD dwFlags)
+{
+  HMODULE hModule = ::LoadLibrary(_T("kernel32.dll"));
+  if (hModule == NULL)
+    return E_FAIL;
+  RegisterApplicationRestartT proc =
+    reinterpret_cast<RegisterApplicationRestartT>(::GetProcAddress(hModule, "RegisterApplicationRestart"));
+  if (proc == NULL)
+  {
+    ::FreeLibrary(hModule);
+    return E_FAIL;
+  }
+  HRESULT ret = (proc)(pwzCommandline, dwFlags);
+  ::FreeLibrary(hModule);
+  return ret;
+}
+
 /* Dialog -- About WAZUH */
 BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message,
        WPARAM wParam,
