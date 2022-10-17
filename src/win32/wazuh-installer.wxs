@@ -652,8 +652,8 @@
         <MajorUpgrade Schedule="afterInstallExecute" AllowDowngrades="yes" />
     </Product>
     <Fragment>
-        <PackageGroup>
-            <MsiPackage>
+        <PackageGroup Id="*">
+            <MsiPackage Name="Wazuh Agent">
                 <!--We add an Msi Property to control the Restart Manager in the installation-->
                 <MsiProperty Name="MSIRESTARTMANAGERCONTROL" Value="DisableShutdown" />
             </MsiPackage>
