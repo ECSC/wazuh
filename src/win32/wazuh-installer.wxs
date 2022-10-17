@@ -68,6 +68,9 @@
             <RegistrySearch Id="WazuhInstalled" Type="raw" Root="HKLM" Key="System\CurrentControlSet\Services\WazuhSvc" Name="DisplayName" />
         </Property>
 
+        <!--We add an Msi Property to control the Restart Manager in the installation-->
+        <MsiProperty Name="MSIRESTARTMANAGERCONTROL" Value="DisableShutdown" />
+
         <!-- This script will remove all of the files and folders from the root folder on uninstall, *except* some files indicated in RemoveAllScript.vbs. -->
         <!-- Especially, "ossec.conf" and "client.keys" will be kept, and a couple of other files too. -->
         <Binary Id="RemoveAllScript" SourceFile="RemoveAllScript.vbs" />
