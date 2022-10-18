@@ -241,6 +241,7 @@ LOGTEST_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'sockets', 'logtest')
 UPGRADE_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'upgrade')
 TASKS_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'task')
 WDB_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb')
+WMODULES_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'sockets', 'wmodules')
 
 
 # ================================================ Wazuh path - Ruleset ================================================
