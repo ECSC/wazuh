@@ -63,6 +63,7 @@ class FileItem final : public DBItem
             m_username = fim->file_entry.data->user_name == NULL ? "" : fim->file_entry.data->user_name;
             m_groupname = fim->file_entry.data->group_name == NULL ? "" : fim->file_entry.data->group_name;
             m_perm = fim->file_entry.data->perm == NULL ? "" : fim->file_entry.data->perm;
+            m_permJSON = fim->file_entry.data->perm_json == NULL ?  nlohmann::json(nullptr) : nlohmann::json::parse(cJSON_Print(fim->file_entry.data->perm_json));
 
             FIMDBCreator<OS_TYPE>::encodeString(m_attributes);
             FIMDBCreator<OS_TYPE>::encodeString(m_username);
@@ -90,12 +91,17 @@ class FileItem final : public DBItem
             m_gid = fim.at("gid");
             m_groupname = fim.at("group_name");
             m_md5 = fim.at("hash_md5");
-            m_perm = fim.at("perm");
             m_sha1 = fim.at("hash_sha1");
             m_sha256 = fim.at("hash_sha256");
             m_uid = fim.at("uid");
             m_username = fim.at("user_name");
-
+#ifdef WIN32
+            m_permJSON = fim["perm"];
+            m_perm = "";
+#else
+            m_permJSON = nlohmann::json(nullptr);
+            m_perm = fim.at("perm");
+#endif
             createFimEntry();
             m_statementConf = std::make_unique<nlohmann::json>(fim);
         };
@@ -126,6 +132,7 @@ class FileItem final : public DBItem
         std::string                                     m_sha1;
         std::string                                     m_sha256;
         std::string                                     m_username;
+        nlohmann::json                                  m_permJSON;
         std::unique_ptr<fim_entry, FimFileDataDeleter>  m_fimEntry;
         std::unique_ptr<nlohmann::json>                 m_statementConf;
 

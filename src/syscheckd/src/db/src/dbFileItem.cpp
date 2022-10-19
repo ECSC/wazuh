@@ -13,8 +13,8 @@
 
 void FileItem::createFimEntry()
 {
-    fim_entry* fim = reinterpret_cast<fim_entry*>(std::calloc(1, sizeof(fim_entry)));
-    fim_file_data* data = reinterpret_cast<fim_file_data*>(std::calloc(1, sizeof(fim_file_data)));
+    fim_entry * fim = reinterpret_cast<fim_entry*>(std::calloc(1, sizeof(fim_entry)));
+    fim_file_data * data = reinterpret_cast<fim_file_data*>(std::calloc(1, sizeof(fim_file_data)));
     auto uid_size = std::to_string(m_uid).size();
     auto gid_size = std::to_string(m_gid).size();
 
@@ -29,6 +29,7 @@ void FileItem::createFimEntry()
             data->perm = const_cast<char*>(m_perm.c_str());
             data->attributes = const_cast<char*>(m_attributes.c_str());
             data->uid = static_cast<char*>(std::calloc(uid_size + 1, sizeof(char)));
+            data->perm_json = m_permJSON.empty() ? NULL : cJSON_Parse(m_permJSON.dump().c_str());
 
             if (data->uid)
             {
@@ -105,7 +106,12 @@ void FileItem::createJSON()
     data["dev"] = m_dev;
     data["inode"] = m_inode;
     data["size"] = m_size;
-    data["perm"] = m_perm;
+    if (m_permJSON.empty()) {
+        data["perm"] = m_perm;
+    }
+    else {
+        data["perm"] = m_permJSON;
+    }
     data["attributes"] = m_attributes;
     data["uid"] = m_uid;
     data["gid"] = m_gid;
